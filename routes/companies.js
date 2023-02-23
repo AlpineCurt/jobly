@@ -11,6 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const companyFilterSchema = require("../schemas/companyFilter.json");
 
 const router = new express.Router();
 
@@ -27,6 +28,7 @@ const router = new express.Router();
 router.post("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
+    debugger;
     if (!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
@@ -52,7 +54,20 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll();
+    //const { name, minEmployees, maxEmployees } = req.query;
+    //Object.keys(req.query).length !== 0 ? console.log("query present") : console.log("no query");
+    //debugger;
+    const validator = jsonschema.validate(req.query, companyFilterSchema);
+    debugger;
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+    if (Object.keys(req.query).length === 0) {
+      const companies = await Company.findAll();
+    } else {
+      const companies = Company.filter(req.query);
+    }
     return res.json({ companies });
   } catch (err) {
     return next(err);

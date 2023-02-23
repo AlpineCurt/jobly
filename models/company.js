@@ -140,6 +140,29 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
+
+  /** Search for companies based on properties allowed in
+   *  schemas/companyFilter.json
+   * 
+   * 'query' parameter is req.query object
+   */
+
+  static async filter(query) {
+    const {name, minEmployees, maxEmployees} = query;
+    
+    if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
+      throw new BadRequestError("Minimum number of employees cannot be greater than maximum number of employees");
+    }
+
+    const baseQuery = `
+      SELECT handle,
+      name,
+      num_employees as "numEmployees",
+      description
+      FROM companies WHERE`;
+    
+    debugger;
+  }
 }
 
 
