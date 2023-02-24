@@ -29,3 +29,6 @@ CREATE DATABASE jobly_test;
 -- ##########THIS WORKS:
 -- SELECT c.handle, c.name, c.num_employees AS "numEmployees", c.description
 -- FROM companies AS c WHERE LOWER(c.name) LIKE LOWER('%wat%');
+
+-- regular user Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTY3NzEwNDQxNX0.vR9fXQhuw1dh5FWitbWYRiHqB7FX99lsD9xWHktaG2w
+-- admin user  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RhZG1pbiIsImlzQWRtaW4iOnRydWUsImlhdCI6MTY3NzI2ODIxM30.bH5Q79w9YlYgKTX52az_rGbgziOewaW9-wcRPALVhr8

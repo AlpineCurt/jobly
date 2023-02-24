@@ -21,7 +21,6 @@ app.use(express.json());
 if (process.env.NODE_ENV !== "test"){
   app.use(morgan("tiny"));
 }
-//app.use(morgan("tiny"));  // Log to console
 app.use(authenticateJWT);
 
 app.use("/auth", authRoutes);
