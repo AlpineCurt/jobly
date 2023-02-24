@@ -54,19 +54,11 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    //const { name, minEmployees, maxEmployees } = req.query;
-    //Object.keys(req.query).length !== 0 ? console.log("query present") : console.log("no query");
-    //debugger;
-    const validator = jsonschema.validate(req.query, companyFilterSchema);
-    debugger;
-    if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
-      throw new BadRequestError(errs);
-    }
+    let companies;
     if (Object.keys(req.query).length === 0) {
-      const companies = await Company.findAll();
+      companies = await Company.findAll();
     } else {
-      const companies = Company.filter(req.query);
+      companies = await Company.filter(req.query);
     }
     return res.json({ companies });
   } catch (err) {

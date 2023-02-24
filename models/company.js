@@ -144,24 +144,51 @@ class Company {
   /** Search for companies based on properties allowed in
    *  schemas/companyFilter.json
    * 
-   * 'query' parameter is req.query object
+   * 'reqquery' parameter is req.query object
+   *  Query strings other than name, minEmployees, and maxEmployees
+   *  are ignored.
    */
 
-  static async filter(query) {
-    const {name, minEmployees, maxEmployees} = query;
+  static async filter(reqquery) {
+    let {name, minEmployees, maxEmployees} = reqquery;
+    minEmployees = +minEmployees;
+    maxEmployees = +maxEmployees;
     
     if (minEmployees && maxEmployees && minEmployees > maxEmployees) {
-      throw new BadRequestError("Minimum number of employees cannot be greater than maximum number of employees");
+      throw new BadRequestError("minEmployees cannot be greater than maxEmployees");
     }
 
-    const baseQuery = `
+    let and = false;
+    let idx = 1;
+    let params = [];
+    let query = `
       SELECT handle,
       name,
-      num_employees as "numEmployees",
-      description
+      num_employees AS "numEmployees",
+      description,
+      logo_url AS "logoUrl"
       FROM companies WHERE`;
-    
-    debugger;
+    if (name) {
+      query += ` LOWER(name) LIKE LOWER($${idx})`
+      params.push(`%${name}%`.toLowerCase());
+      idx++;
+      and = true;
+    }
+    if (minEmployees) {
+      if (and) {query += ` AND`};
+      query += ` num_employees >= $${idx}`;
+      params.push(`${minEmployees}`);
+      idx++;
+      and = true;
+    }
+    if (maxEmployees) {
+      if (and) {query += ` AND`};
+      query += ` num_employees <= $${idx}`;
+      params.push(`${maxEmployees}`);
+    }
+
+    const companies = await db.query(query, params);
+    return companies.rows;
   }
 }
 

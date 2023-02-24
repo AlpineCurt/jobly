@@ -206,3 +206,25 @@ describe("remove", function () {
     }
   });
 });
+
+/************************************** filter */
+
+describe("filter", () => {
+  test("filter by name", async () => {
+    const reqquery = {
+      name: "c2"
+    }
+    const res = await Company.filter(reqquery);
+    expect(res).toEqual(
+          [
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            }
+          ]
+    );
+  });
+});
