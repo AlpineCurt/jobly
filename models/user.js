@@ -204,6 +204,32 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
+
+  static async apply(username, jobId) {
+    try {
+      const result = await db.query(`
+        INSERT INTO applications
+        (username, job_id)
+        VALUES
+        ($1, $2)
+        RETURNING username, job_id
+      `, [username, jobId]);
+      return result.rows[0];
+    } catch (err) {
+      //debugger;
+      if (err.code === "23505") {
+        throw new BadRequestError(`${username} has already applied for job with id of ${jobId}`);
+      }
+    }
+    // try {
+    //   const result = await db.query(`
+    //     INSERT INTO applications
+    //     ()
+    //   `)
+    // } catch (err) {
+
+    // }
+  }
 }
 
 

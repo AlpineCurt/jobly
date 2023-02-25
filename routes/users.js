@@ -11,6 +11,7 @@ const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const Job = require("../models/job");
 
 const router = express.Router();
 
@@ -119,6 +120,26 @@ router.delete("/:username", ensureLoggedIn, async function (req, res, next) {
     if (res.locals.user.username === req.params.username || res.locals.user.isAdmin === true) {
       await User.remove(req.params.username);
       return res.json({ deleted: req.params.username });
+    }
+    throw new UnauthorizedError();
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST /:username/jobs/:id
+ * 
+ *  :username applies for job with :id
+ * 
+ * Authorization required:  admin or current user
+ */
+
+router.post("/:username/jobs/:id", ensureLoggedIn, async (req, res, next) => {
+  try {
+    if (res.locals.user.username === req.params.username || res.locals.user.isAdmin === true) {
+      const { username, id } = req.params;
+      await User.apply(username, id);
+      return res.json({ applied: id });
     }
     throw new UnauthorizedError();
   } catch (err) {
