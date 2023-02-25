@@ -129,6 +129,50 @@ class Job {
 
     if (!job) throw new NotFoundError(`No job with id: ${id}`);
   }
+
+  /** Search for jobs based on title, minSalary, hasEquity
+   * 
+   * 'reqquery' parameter is req.query object
+   *  Query strings other than name, minSalary, and hasEquity
+   *  are ignored.
+   */
+
+  static async filter(reqquery) {
+    let {title, minSalary, hasEquity} = reqquery;
+    minSalary = +minSalary;
+
+    let and = false;
+    let idx = 1;
+    let params = [];
+    let query = `
+      SELECT id,
+      title,
+      salary,
+      equity,
+      company_handle AS "companyHandle"
+      FROM jobs WHERE`;
+    if (title) {
+      query += ` LOWER(title) LIKE LOWER($${idx})`
+      params.push(`%${title}%`.toLowerCase());
+      idx++;
+      and = true;
+    }
+    if (minSalary) {
+      if (and) {query += ` AND`};
+      query += ` salary >= $${idx}`;
+      params.push(`${minSalary}`);
+      idx++;
+      and = true;
+    }
+    if (hasEquity === "true") {
+      if (and) {query += ` AND`};
+      query += ` equity > $${idx}`;
+      params.push(`0`);
+    }
+
+    const jobs = await db.query(query, params);
+    return jobs.rows;
+  }
 }
 
 module.exports = Job;

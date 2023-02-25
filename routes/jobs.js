@@ -56,13 +56,13 @@ router.get("/", async function (req, res, next) {
       if (Object.keys(req.query).length === 0) {
         jobs = await Job.findAll();
       } else {
-        //jobs = await Job.filter(req.query);
+        jobs = await Job.filter(req.query);
       }
       return res.json({ jobs });
     } catch (err) {
       return next(err);
     }
-  });
+});
 
 /** GET /[id]  =>  { job }
  *
@@ -78,7 +78,7 @@ router.get("/:id", async function (req, res, next) {
     } catch (err) {
       return next(err);
     }
-  });
+});
 
 /** PATCH /[id] { fld1, fld2, ... } => { job }
  *

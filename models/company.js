@@ -141,8 +141,7 @@ class Company {
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 
-  /** Search for companies based on properties allowed in
-   *  schemas/companyFilter.json
+  /** Search for companies based on name, min/max employees.
    * 
    * 'reqquery' parameter is req.query object
    *  Query strings other than name, minEmployees, and maxEmployees
