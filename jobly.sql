@@ -32,3 +32,26 @@ CREATE DATABASE jobly_test;
 
 -- regular user Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaXNBZG1pbiI6ZmFsc2UsImlhdCI6MTY3NzEwNDQxNX0.vR9fXQhuw1dh5FWitbWYRiHqB7FX99lsD9xWHktaG2w
 -- admin user  Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3RhZG1pbiIsImlzQWRtaW4iOnRydWUsImlhdCI6MTY3NzI2ODIxM30.bH5Q79w9YlYgKTX52az_rGbgziOewaW9-wcRPALVhr8
+
+SELECT u.username,
+u.first_name AS firstName,
+u.last_name AS lastName,
+u.email,
+u.is_admin AS is_admin,
+j.jobs
+FROM users AS u
+JOIN applications AS a
+ON a.username = u.username
+JOIN jobs AS j
+ON a.job_id = j.id
+
+SELECT u.username,
+u.first_name AS firstName,
+u.last_name AS lastName,
+u.email,
+u.is_admin AS is_admin,
+a.job_id
+FROM users AS u
+LEFT JOIN applications AS a
+ON u.username = a.username
+WHERE u.username = 'testuse'

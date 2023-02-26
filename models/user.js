@@ -98,11 +98,12 @@ class User {
 
   /** Find all users.
    *
-   * Returns [{ username, first_name, last_name, email, is_admin }, ...]
+   * Returns [{ username, first_name, last_name, email, is_admin, jobs }, ...]
+   *   where jobs is list of job_ids applied for.
    **/
 
   static async findAll() {
-    const result = await db.query(
+    const usersRes = await db.query(
           `SELECT username,
                   first_name AS "firstName",
                   last_name AS "lastName",
@@ -112,13 +113,22 @@ class User {
            ORDER BY username`,
     );
 
-    return result.rows;
+    const userList = Promise.all(usersRes.rows.map(async r => {
+      let user = r;
+      const jobsRes = await db.query(`
+        SELECT job_id FROM applications WHERE username = $1
+      `, [r.username]);
+      user.jobs = jobsRes.rows.map(i => i.job_id);
+      return user;
+    }));
+    
+    return userList;
   }
 
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is list of job_ids applied for.
    *
    * Throws NotFoundError if user not found.
    **/
@@ -134,10 +144,15 @@ class User {
            WHERE username = $1`,
         [username],
     );
-
     const user = userRes.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+
+    const jobsRes = await db.query(`
+      SELECT job_id FROM applications WHERE username = $1
+    `, [username]);
+    const userJobs = jobsRes.rows.map(r => r.job_id);
+    user.jobs = userJobs
 
     return user;
   }
@@ -212,23 +227,16 @@ class User {
         (username, job_id)
         VALUES
         ($1, $2)
-        RETURNING username, job_id
+        RETURNING username, job_id AS "jobId"
       `, [username, jobId]);
       return result.rows[0];
     } catch (err) {
-      //debugger;
       if (err.code === "23505") {
         throw new BadRequestError(`${username} has already applied for job with id of ${jobId}`);
+      } else if (err.code === "23503") {
+        throw new NotFoundError(`No user: ${username}`);
       }
     }
-    // try {
-    //   const result = await db.query(`
-    //     INSERT INTO applications
-    //     ()
-    //   `)
-    // } catch (err) {
-
-    // }
   }
 }
 

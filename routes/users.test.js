@@ -130,6 +130,7 @@ describe("POST /users", function () {
 
 describe("GET /users", function () {
   test("works for admin", async function () {
+    await User.apply("u1", 1);
     const resp = await request(app)
         .get("/users")
         .set("authorization", `Bearer ${u4Token}`);
@@ -141,6 +142,7 @@ describe("GET /users", function () {
           lastName: "U1L",
           email: "user1@user.com",
           isAdmin: false,
+          jobs: [1]
         },
         {
           username: "u2",
@@ -148,6 +150,7 @@ describe("GET /users", function () {
           lastName: "U2L",
           email: "user2@user.com",
           isAdmin: false,
+          jobs: []
         },
         {
           username: "u3",
@@ -155,6 +158,7 @@ describe("GET /users", function () {
           lastName: "U3L",
           email: "user3@user.com",
           isAdmin: false,
+          jobs: []
         },
         {
           username: "u4",
@@ -162,6 +166,7 @@ describe("GET /users", function () {
           lastName: "U4L",
           email: "user4@user.com",
           isAdmin: true,
+          jobs: []
         }
       ],
     });
@@ -196,6 +201,7 @@ describe("GET /users", function () {
 
 describe("GET /users/:username", function () {
   test("works for admin", async function () {
+    await User.apply("u1", 1);
     const resp = await request(app)
         .get(`/users/u1`)
         .set("authorization", `Bearer ${u4Token}`);
@@ -206,11 +212,13 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [1]
       },
     });
   });
 
   test("works for correct user", async function () {
+    await User.apply("u1", 1);
     const resp = await request(app)
         .get(`/users/u1`)
         .set("authorization", `Bearer ${u1Token}`);
@@ -221,6 +229,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [1]
       },
     });
   });
@@ -380,5 +389,53 @@ describe("DELETE /users/:username", function () {
         .delete(`/users/nope`)
         .set("authorization", `Bearer ${u4Token}`);
     expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/**************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", () => {
+  test("works for admin", async () => {
+    const resp = await request(app)
+      .post("/users/u1/jobs/1")
+      .set("authorization", `Bearer ${u4Token}`);
+    expect(resp.body).toEqual({
+      applied: "1"
+    });
+  });
+
+  test("works for correct user", async function () {
+    const resp = await request(app)
+        .post(`/users/u1/jobs/1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ applied: "1" });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .post(`/users/u1/jobs/1`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("unauth for wrong user", async function () {
+    const resp = await request(app)
+        .post(`/users/u2/jobs/1`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.statusCode).toEqual(401);
+  });
+
+  test("not found if user missing", async function () {
+    const resp = await request(app)
+        .post(`/users/u7/jobs/1`)
+        .set("authorization", `Bearer ${u4Token}`);
+    expect(resp.statusCode).toEqual(404);
+  });
+
+  test("err for duplicate entry", async function () {
+    await User.apply("u1", 1);
+    const resp = await request(app)
+        .post(`/users/u1/jobs/1`)
+        .set("authorization", `Bearer ${u4Token}`);
+    expect(resp.statusCode).toEqual(400);
   });
 });

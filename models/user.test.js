@@ -109,6 +109,7 @@ describe("register", function () {
 
 describe("findAll", function () {
   test("works", async function () {
+    await User.apply("u1", 1);
     const users = await User.findAll();
     expect(users).toEqual([
       {
@@ -117,6 +118,7 @@ describe("findAll", function () {
         lastName: "U1L",
         email: "u1@email.com",
         isAdmin: false,
+        jobs: [1]
       },
       {
         username: "u2",
@@ -124,6 +126,7 @@ describe("findAll", function () {
         lastName: "U2L",
         email: "u2@email.com",
         isAdmin: false,
+        jobs: []
       },
     ]);
   });
@@ -133,6 +136,7 @@ describe("findAll", function () {
 
 describe("get", function () {
   test("works", async function () {
+    await User.apply("u1", 1)
     let user = await User.get("u1");
     expect(user).toEqual({
       username: "u1",
@@ -140,6 +144,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [1]
     });
   });
 
@@ -225,6 +230,27 @@ describe("remove", function () {
       fail();
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+/************************************** apply */
+
+describe("apply", function () {
+  test("works", async function () {
+    const result = await User.apply("u1", 1);
+    expect(result).toEqual({
+      username: "u1",
+      jobId: 1
+    });
+  });
+
+  test("error if user already applied", async function () {
+    await User.apply("u1", 1);
+    try {
+      const result = await User.apply("u1", 1);
+    } catch (err) {
+      expect(err instanceof BadRequestError).toBeTruthy();
     }
   });
 });
